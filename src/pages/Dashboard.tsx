@@ -1,5 +1,5 @@
 import { useEffect, useState } from 'react'
-import { useParams } from 'react-router-dom'
+import { useParams, useNavigate } from 'react-router-dom'
 import { supabase } from '../lib/supabase'
 import { advanceRound } from '../engine/simulator'
 import type { Role } from '../types/index'
@@ -15,6 +15,7 @@ const ROLES: Role[] = ['retailer', 'wholesaler', 'distributor', 'factory']
 
 export default function Dashboard() {
   const { sessionId } = useParams()
+  const navigate = useNavigate()
   const [session, setSession] = useState<any>(null)
   const [teams, setTeams] = useState<any[]>([])
   const [allStates, setAllStates] = useState<any[]>([])
@@ -178,8 +179,14 @@ export default function Dashboard() {
           )
         })}
 
-        {/* Botón avanzar ronda */}
-        {session?.round_advance_mode === 'manual' || allTeamsReady ? (
+        {session?.status === 'finished' ? (
+          <button
+            onClick={() => navigate(`/debrief/${sessionId}`)}
+            className="bg-green-600 hover:bg-green-700 text-white font-semibold py-4 rounded-xl text-lg transition"
+          >
+            Ver debrief →
+          </button>
+        ) : (session?.round_advance_mode === 'manual' || allTeamsReady) ? (
           <button
             onClick={handleAdvanceRound}
             disabled={advancing || !allTeamsReady}

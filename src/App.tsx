@@ -6,6 +6,7 @@ import Join from './pages/Join'
 import WaitingRoom from './pages/WaitingRoom'
 import GameRound from './pages/GameRound'
 import Dashboard from './pages/Dashboard'
+import Debrief from './pages/Debrief'
 
 function App() {
   return (
@@ -17,6 +18,7 @@ function App() {
       <Route path="/espera/:sessionId" element={<WaitingRoom />} />
       <Route path="/ronda/:sessionId" element={<GameRound />} />
       <Route path="/dashboard/:sessionId" element={<Dashboard />} />
+      <Route path="/debrief/:sessionId" element={<Debrief />} />
     </Routes>
   )
 }
