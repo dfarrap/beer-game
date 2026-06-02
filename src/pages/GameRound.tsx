@@ -21,7 +21,6 @@ export default function GameRound() {
   const [searchParams] = useSearchParams()
   const role = searchParams.get('role') ?? ''
   const teamId = searchParams.get('team') ?? ''
-  const playerName = searchParams.get('name') ?? ''
 
   const [session, setSession] = useState<any>(null)
   const [roundState, setRoundState] = useState<any>(null)
