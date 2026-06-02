@@ -44,6 +44,21 @@ export default function Dashboard() {
     return () => { supabase.removeChannel(channel) }
   }, [sessionId])
 
+  useEffect(() => {
+    if (!session || !teams.length || advancing) return
+    if (session.round_advance_mode !== 'automatic') return
+    if (session.status !== 'running') return
+
+    const allReady = teams.every(t => {
+      const states = allStates.filter(
+        s => s.team_id === t.id && s.round === session.current_round
+      )
+      return states.length === 4 && states.every(s => s.order_placed !== null)
+    })
+
+    if (allReady) handleAdvanceRound()
+  }, [allStates, session, teams])
+
   async function loadData() {
     const [{ data: sessionData }, { data: teamsData }, { data: statesData }] =
       await Promise.all([
