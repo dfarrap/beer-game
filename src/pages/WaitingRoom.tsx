@@ -1,5 +1,5 @@
 import { useEffect, useState } from 'react'
-import { useParams, useSearchParams } from 'react-router-dom'
+import { useParams, useSearchParams, useNavigate } from 'react-router-dom'
 import { supabase } from '../lib/supabase'
 
 const ROLE_LABELS: Record<string, string> = {
@@ -23,6 +23,7 @@ export default function WaitingRoom() {
   const teamId = searchParams.get('team') ?? ''
   const playerName = searchParams.get('name') ?? ''
 
+  const navigate = useNavigate()
   const [players, setPlayers] = useState<any[]>([])
   const [sessionStatus, setSessionStatus] = useState('lobby')
 
@@ -46,6 +47,7 @@ export default function WaitingRoom() {
       }, (payload) => {
         if (payload.new.status === 'running') {
           setSessionStatus('running')
+          navigate(`/ronda/${sessionId}?role=${role}&team=${teamId}&name=${encodeURIComponent(playerName)}`)
         }
       })
       .subscribe()

@@ -2,6 +2,7 @@ import { useEffect, useState } from 'react'
 import { useParams, useNavigate } from 'react-router-dom'
 import { supabase } from '../lib/supabase'
 import type { Session, Team, Player } from '../types/index'
+import { createInitialStates, DEFAULT_CONFIG } from '../engine/simulator'
 
 export default function Lobby() {
   const { sessionId } = useParams()
@@ -43,10 +44,20 @@ export default function Lobby() {
   }
 
   async function handleStart() {
+    const config = session?.config ?? DEFAULT_CONFIG
+
+    // Crear round_states iniciales para todos los equipos
+    const initialStates = teams.flatMap(team =>
+      createInitialStates(team.id, config).map(s => ({ ...s, round: 1 }))
+    )
+
+    await supabase.from('round_states').insert(initialStates)
+
     await supabase
       .from('sessions')
       .update({ status: 'running', current_round: 1 })
       .eq('id', sessionId)
+
     navigate(`/dashboard/${sessionId}`)
   }
 

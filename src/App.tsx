@@ -4,6 +4,8 @@ import CreateSession from './pages/CreateSession'
 import Lobby from './pages/Lobby'
 import Join from './pages/Join'
 import WaitingRoom from './pages/WaitingRoom'
+import GameRound from './pages/GameRound'
+import Dashboard from './pages/Dashboard'
 
 function App() {
   return (
@@ -13,6 +15,8 @@ function App() {
       <Route path="/lobby/:sessionId" element={<Lobby />} />
       <Route path="/unirse" element={<Join />} />
       <Route path="/espera/:sessionId" element={<WaitingRoom />} />
+      <Route path="/ronda/:sessionId" element={<GameRound />} />
+      <Route path="/dashboard/:sessionId" element={<Dashboard />} />
     </Routes>
   )
 }
