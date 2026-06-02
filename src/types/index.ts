@@ -12,6 +12,7 @@ export interface GameConfig {
   backorderCost: number
   totalRounds: number
   demandPattern: number[]
+  initialDemandInTransit: number
 }
 
 export interface Session {

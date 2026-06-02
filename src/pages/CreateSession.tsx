@@ -2,9 +2,44 @@ import { useState } from 'react'
 import { useNavigate } from 'react-router-dom'
 import { supabase } from '../lib/supabase'
 import { DEFAULT_CONFIG } from '../engine/simulator'
+import type { GameConfig } from '../types/index'
 
 function generateCode(): string {
   return Math.random().toString(36).substring(2, 8).toUpperCase()
+}
+
+function NumberInput({
+  label,
+  hint,
+  value,
+  min,
+  max,
+  step = 1,
+  onChange,
+}: {
+  label: string
+  hint?: string
+  value: number
+  min: number
+  max: number
+  step?: number
+  onChange: (v: number) => void
+}) {
+  return (
+    <div className="flex flex-col gap-1">
+      <label className="text-gray-300 text-sm">{label}</label>
+      {hint && <p className="text-gray-500 text-xs">{hint}</p>}
+      <input
+        type="number"
+        min={min}
+        max={max}
+        step={step}
+        value={value}
+        onChange={e => onChange(Math.max(min, Math.min(max, Number(e.target.value))))}
+        className="bg-gray-700 text-white rounded-lg px-4 py-2 outline-none focus:ring-2 focus:ring-blue-500 w-full"
+      />
+    </div>
+  )
 }
 
 export default function CreateSession() {
@@ -12,8 +47,15 @@ export default function CreateSession() {
   const [hostName, setHostName] = useState('')
   const [numTeams, setNumTeams] = useState(2)
   const [roundAdvanceMode, setRoundAdvanceMode] = useState<'automatic' | 'manual'>('automatic')
+  const [showAdvanced, setShowAdvanced] = useState(false)
   const [loading, setLoading] = useState(false)
   const [error, setError] = useState('')
+
+  const [config, setConfig] = useState<GameConfig>(DEFAULT_CONFIG)
+
+  function setParam<K extends keyof GameConfig>(key: K, value: GameConfig[K]) {
+    setConfig(prev => ({ ...prev, [key]: value }))
+  }
 
   async function handleCreate() {
     if (!hostName.trim()) {
@@ -31,7 +73,7 @@ export default function CreateSession() {
         code,
         host_id: hostName.trim(),
         status: 'lobby',
-        config: DEFAULT_CONFIG,
+        config,
         current_round: 0,
         round_advance_mode: roundAdvanceMode,
       })
@@ -44,15 +86,12 @@ export default function CreateSession() {
       return
     }
 
-    // Crear equipos
     const teamsToInsert = Array.from({ length: numTeams }, (_, i) => ({
       session_id: session.id,
       name: `Equipo ${i + 1}`,
     }))
 
-    const { error: teamsError } = await supabase
-      .from('teams')
-      .insert(teamsToInsert)
+    const { error: teamsError } = await supabase.from('teams').insert(teamsToInsert)
 
     if (teamsError) {
       setError('Error al crear equipos: ' + teamsError.message)
@@ -65,10 +104,11 @@ export default function CreateSession() {
 
   return (
     <div className="min-h-screen bg-gray-900 flex flex-col items-center justify-center p-6">
-      <div className="w-full max-w-md bg-gray-800 rounded-2xl p-8 flex flex-col gap-6">
+      <div className="w-full max-w-md bg-gray-800 rounded-2xl p-8 flex flex-col gap-5">
         <h1 className="text-2xl font-bold text-white">Nueva sesión</h1>
 
-        <div className="flex flex-col gap-2">
+        {/* Instructor */}
+        <div className="flex flex-col gap-1">
           <label className="text-gray-300 text-sm">Tu nombre (instructor)</label>
           <input
             type="text"
@@ -79,7 +119,8 @@ export default function CreateSession() {
           />
         </div>
 
-        <div className="flex flex-col gap-2">
+        {/* Equipos */}
+        <div className="flex flex-col gap-1">
           <label className="text-gray-300 text-sm">Número de equipos</label>
           <select
             value={numTeams}
@@ -92,15 +133,14 @@ export default function CreateSession() {
           </select>
         </div>
 
-        <div className="flex flex-col gap-2">
+        {/* Avance de ronda */}
+        <div className="flex flex-col gap-1">
           <label className="text-gray-300 text-sm">Avance de ronda</label>
           <div className="flex gap-3">
             <button
               onClick={() => setRoundAdvanceMode('automatic')}
               className={`flex-1 py-3 rounded-lg font-medium transition ${
-                roundAdvanceMode === 'automatic'
-                  ? 'bg-blue-600 text-white'
-                  : 'bg-gray-700 text-gray-300'
+                roundAdvanceMode === 'automatic' ? 'bg-blue-600 text-white' : 'bg-gray-700 text-gray-300'
               }`}
             >
               Automático
@@ -108,15 +148,118 @@ export default function CreateSession() {
             <button
               onClick={() => setRoundAdvanceMode('manual')}
               className={`flex-1 py-3 rounded-lg font-medium transition ${
-                roundAdvanceMode === 'manual'
-                  ? 'bg-blue-600 text-white'
-                  : 'bg-gray-700 text-gray-300'
+                roundAdvanceMode === 'manual' ? 'bg-blue-600 text-white' : 'bg-gray-700 text-gray-300'
               }`}
             >
               Manual
             </button>
           </div>
         </div>
+
+        {/* Parámetros avanzados */}
+        <button
+          onClick={() => setShowAdvanced(!showAdvanced)}
+          className="text-blue-400 hover:text-blue-300 text-sm text-left transition"
+        >
+          {showAdvanced ? '▲ Ocultar parámetros del juego' : '▼ Configurar parámetros del juego'}
+        </button>
+
+        {showAdvanced && (
+          <div className="flex flex-col gap-4 bg-gray-900 rounded-xl p-4">
+
+            <NumberInput
+              label="Inventario inicial (unidades)"
+              hint="Unidades con las que arranca cada rol"
+              value={config.initialInventory}
+              min={0}
+              max={100}
+              onChange={v => setParam('initialInventory', v)}
+            />
+
+            <NumberInput
+              label="Demanda en tránsito inicial (unidades)"
+              hint="Unidades pre-cargadas en las tuberías al inicio"
+              value={config.initialDemandInTransit}
+              min={0}
+              max={50}
+              onChange={v => setParam('initialDemandInTransit', v)}
+            />
+
+            <NumberInput
+              label="Lead time de pedido (rondas)"
+              hint="Rondas que tarda un pedido en llegar al proveedor"
+              value={config.orderDelay}
+              min={1}
+              max={6}
+              onChange={v => setParam('orderDelay', v)}
+            />
+
+            <NumberInput
+              label="Lead time de envío (rondas)"
+              hint="Rondas que tarda la mercancía en llegar"
+              value={config.shippingDelay}
+              min={1}
+              max={6}
+              onChange={v => setParam('shippingDelay', v)}
+            />
+
+            <NumberInput
+              label="Número de rondas"
+              value={config.totalRounds}
+              min={5}
+              max={52}
+              onChange={v => {
+                const newPattern = Array.from({ length: v }, (_, i) =>
+                  i < 4 ? 4 : 8
+                )
+                setConfig(prev => ({ ...prev, totalRounds: v, demandPattern: newPattern }))
+              }}
+            />
+
+            <NumberInput
+              label="Costo de inventario ($ por unidad por ronda)"
+              value={config.inventoryCost}
+              min={0}
+              max={10}
+              step={0.1}
+              onChange={v => setParam('inventoryCost', v)}
+            />
+
+            <NumberInput
+              label="Costo de backorder ($ por unidad por ronda)"
+              hint="Costo por unidad no entregada a tiempo"
+              value={config.backorderCost}
+              min={0}
+              max={10}
+              step={0.1}
+              onChange={v => setParam('backorderCost', v)}
+            />
+
+            <div className="flex flex-col gap-2">
+              <label className="text-gray-300 text-sm">Demanda del cliente por ronda</label>
+              <p className="text-gray-500 text-xs">Unidades que el cliente final pide en cada ronda</p>
+              <div className="grid grid-cols-4 gap-2 max-h-64 overflow-y-auto pr-1">
+                {config.demandPattern.map((val, i) => (
+                  <div key={i} className="flex flex-col items-center gap-1">
+                    <span className="text-gray-500 text-xs">R{i + 1}</span>
+                    <input
+                      type="number"
+                      min={0}
+                      max={999}
+                      value={val}
+                      onChange={e => {
+                        const newPattern = [...config.demandPattern]
+                        newPattern[i] = Math.max(0, Number(e.target.value))
+                        setConfig(prev => ({ ...prev, demandPattern: newPattern }))
+                      }}
+                      className="bg-gray-700 text-white rounded-lg px-2 py-2 text-center text-sm outline-none focus:ring-2 focus:ring-blue-500 w-full"
+                    />
+                  </div>
+                ))}
+              </div>
+            </div>
+          </div>
+        )}
 
         {error && <p className="text-red-400 text-sm">{error}</p>}
 
