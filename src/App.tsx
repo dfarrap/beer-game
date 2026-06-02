@@ -1,8 +1,19 @@
+import { Routes, Route } from 'react-router-dom'
+import Home from './pages/Home'
+import CreateSession from './pages/CreateSession'
+import Lobby from './pages/Lobby'
+import Join from './pages/Join'
+import WaitingRoom from './pages/WaitingRoom'
+
 function App() {
   return (
-    <div className="flex items-center justify-center h-screen bg-gray-900">
-      <p className="text-white text-2xl font-bold">Beer Game — INALDE</p>
-    </div>
+    <Routes>
+      <Route path="/" element={<Home />} />
+      <Route path="/crear" element={<CreateSession />} />
+      <Route path="/lobby/:sessionId" element={<Lobby />} />
+      <Route path="/unirse" element={<Join />} />
+      <Route path="/espera/:sessionId" element={<WaitingRoom />} />
+    </Routes>
   )
 }
 

@@ -1,4 +1,4 @@
-import { GameConfig, Role, RoundState } from '../types'
+import type { GameConfig, Role, RoundState } from '../types/index'
 
 const ROLES: Role[] = ['retailer', 'wholesaler', 'distributor', 'factory']
 
