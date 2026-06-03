@@ -40,11 +40,11 @@ export default function Join() {
       .from('sessions')
       .select('*')
       .eq('code', code.trim().toUpperCase())
-      .eq('status', 'lobby')
+      .in('status', ['lobby', 'running'])
       .single()
 
     if (sessionError || !sessionData) {
-      setError('Código inválido o la sesión ya inició')
+      setError('Código inválido o la sesión ya finalizó')
       setLoading(false)
       return
     }
@@ -89,7 +89,11 @@ export default function Join() {
       return
     }
 
-    navigate(`/espera/${session.id}?role=${selectedRole}&team=${selectedTeam}&name=${encodeURIComponent(name)}`)
+    if (session.status === 'running') {
+      navigate(`/ronda/${session.id}?role=${selectedRole}&team=${selectedTeam}&name=${encodeURIComponent(name)}`)
+    } else {
+      navigate(`/espera/${session.id}?role=${selectedRole}&team=${selectedTeam}&name=${encodeURIComponent(name)}`)
+    }
   }
 
   if (step === 'code') return (

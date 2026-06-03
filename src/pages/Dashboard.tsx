@@ -3,6 +3,7 @@ import { useParams, useNavigate } from 'react-router-dom'
 import { supabase } from '../lib/supabase'
 import { advanceRound } from '../engine/simulator'
 import type { Role } from '../types/index'
+import { QRCodeSVG } from 'qrcode.react'
 
 const ROLE_LABELS: Record<string, string> = {
   retailer: 'Minorista',
@@ -20,6 +21,7 @@ export default function Dashboard() {
   const [teams, setTeams] = useState<any[]>([])
   const [allStates, setAllStates] = useState<any[]>([])
   const [advancing, setAdvancing] = useState(false)
+  const [showQR, setShowQR] = useState(false)
 
   useEffect(() => {
     if (!sessionId) return
@@ -136,11 +138,45 @@ export default function Dashboard() {
               Modo: {session?.round_advance_mode === 'automatic' ? 'Automático' : 'Manual'}
             </p>
           </div>
-          <div className="bg-gray-800 rounded-xl px-4 py-2 text-center">
+          <button
+            onClick={() => setShowQR(true)}
+            className="bg-gray-800 hover:bg-gray-700 rounded-xl px-4 py-2 text-center transition"
+          >
             <p className="text-gray-400 text-xs">Código</p>
             <p className="text-white font-bold text-xl tracking-widest">{session?.code}</p>
-          </div>
+            <p className="text-blue-400 text-xs mt-1">Ver QR</p>
+          </button>
         </div>
+
+        {/* Modal QR */}
+        {showQR && (
+          <div
+            className="fixed inset-0 bg-black bg-opacity-70 flex items-center justify-center z-50 p-6"
+            onClick={() => setShowQR(false)}
+          >
+            <div
+              className="bg-gray-800 rounded-2xl p-8 flex flex-col items-center gap-4 max-w-xs w-full"
+              onClick={e => e.stopPropagation()}
+            >
+              <p className="text-white font-bold text-lg">Únete a la sesión</p>
+              <p className="text-gray-400 text-sm text-center">Escanea el QR o ingresa el código en:</p>
+              <p className="text-blue-400 text-sm font-medium">beergame.inalde.cloud/unirse</p>
+              <div className="bg-white p-3 rounded-xl">
+                <QRCodeSVG
+                  value={`https://beergame.inalde.cloud/unirse?code=${session?.code}`}
+                  size={200}
+                />
+              </div>
+              <p className="text-5xl font-bold text-white tracking-widest">{session?.code}</p>
+              <button
+                onClick={() => setShowQR(false)}
+                className="bg-gray-700 hover:bg-gray-600 text-white text-sm font-medium px-6 py-2 rounded-lg transition w-full"
+              >
+                Cerrar
+              </button>
+            </div>
+          </div>
+        )}
 
         {/* Tarjetas por equipo */}
         {teams.map(team => {
