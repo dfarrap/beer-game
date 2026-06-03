@@ -385,7 +385,7 @@ export default function Dashboard() {
         </button>
 
         <div className="flex justify-center pt-2 pb-4">
-          <img src="/INALDE_Blanco.png" alt="INALDE" className="h-10 w-auto opacity-70" />
+          <img src="/INALDE_Blanco.png" alt="INALDE" style={{ height: '70px' }} className="w-auto opacity-90" />
         </div>
 
       </div>

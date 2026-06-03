@@ -223,7 +223,7 @@ export default function GameRound() {
         <p className="text-gray-500 text-sm text-center">
           El instructor mostrará el debrief completo con las gráficas del equipo.
         </p>
-        <img src="/INALDE_Blanco.png" alt="INALDE" className="h-10 w-auto opacity-70" />
+        <img src="/INALDE_Blanco.png" alt="INALDE" style={{ height: '70px' }} className="w-auto opacity-90" />
       </div>
     )
   }
