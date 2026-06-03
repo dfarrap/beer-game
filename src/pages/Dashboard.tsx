@@ -82,6 +82,13 @@ export default function Dashboard() {
     const nextRound = session.current_round + 1
     const config = session.config
 
+    if (nextRound > config.totalRounds) {
+      // Última ronda completada → finalizar sin crear estados nuevos
+      await supabase.from('sessions').update({ status: 'finished' }).eq('id', sessionId)
+      setAdvancing(false)
+      return
+    }
+
     for (const team of teams) {
       const currentStates = allStates.filter(
         s => s.team_id === team.id && s.round === session.current_round
@@ -101,12 +108,7 @@ export default function Dashboard() {
       )
     }
 
-    if (nextRound > config.totalRounds) {
-      await supabase.from('sessions').update({ status: 'finished' }).eq('id', sessionId)
-    } else {
-      await supabase.from('sessions').update({ current_round: nextRound }).eq('id', sessionId)
-    }
-
+    await supabase.from('sessions').update({ current_round: nextRound }).eq('id', sessionId)
     setAdvancing(false)
   }
 
@@ -228,7 +230,11 @@ export default function Dashboard() {
             disabled={advancing || !allTeamsReady}
             className="bg-blue-600 hover:bg-blue-700 disabled:opacity-50 text-white font-semibold py-4 rounded-xl text-lg transition"
           >
-            {advancing ? 'Avanzando...' : allTeamsReady ? `Avanzar a ronda ${currentRound + 1} →` : 'Esperando que todos confirmen...'}
+            {advancing ? 'Procesando...' : allTeamsReady
+              ? currentRound >= (session?.config?.totalRounds ?? 0)
+                ? '🏁 Finalizar juego'
+                : `Avanzar a ronda ${currentRound + 1} →`
+              : 'Esperando que todos confirmen...'}
           </button>
         ) : null}
 

@@ -48,7 +48,9 @@ export default function GameRound() {
         filter: `id=eq.${sessionId}`,
       }, (payload) => {
         setSession(payload.new)
-        if (payload.new.status !== 'finished') {
+        if (payload.new.status === 'finished') {
+          loadData()
+        } else {
           setSubmitted(false)
           setOrderInput('')
           loadData()
@@ -99,17 +101,35 @@ export default function GameRound() {
 
   // Pantalla final del jugador
   if (session?.status === 'finished') {
-    const myStates = teamStates.filter(s => s.role === role)
+    const totalRounds = session?.config?.totalRounds ?? 0
+
+    // Deduplicar por ronda: si hay duplicados quedarse con el que tiene order_placed
+    const myStatesRaw = teamStates.filter(s => s.role === role && s.round <= totalRounds)
+    const myStatesMap = new Map<number, any>()
+    for (const s of myStatesRaw) {
+      const existing = myStatesMap.get(s.round)
+      if (!existing || (s.order_placed !== null && existing.order_placed === null)) {
+        myStatesMap.set(s.round, s)
+      }
+    }
+    const myStates = Array.from(myStatesMap.values())
+
     const lastState = myStates.sort((a, b) => b.round - a.round)[0]
     const totalCost = lastState?.cumulative_cost ?? 0
-    const totalRounds = session?.config?.totalRounds ?? 0
     const avgInventory = myStates.length > 0
       ? (myStates.reduce((sum, s) => sum + s.inventory, 0) / myStates.length).toFixed(1)
       : 0
     const totalBackorder = myStates.reduce((sum, s) => sum + s.backorder, 0)
-    const teamTotalCost = teamStates
-      .filter(s => s.round === Math.max(...teamStates.map(x => x.round)))
-      .reduce((sum, s) => sum + s.cumulative_cost, 0)
+
+    // Costo del equipo: usar solo rondas <= totalRounds, último estado por rol
+    const validTeamStates = teamStates.filter(s => s.round <= totalRounds)
+    const teamLastByRole = new Map<string, any>()
+    for (const s of validTeamStates) {
+      const key = `${s.team_id}-${s.role}`
+      const existing = teamLastByRole.get(key)
+      if (!existing || s.round > existing.round) teamLastByRole.set(key, s)
+    }
+    const teamTotalCost = Array.from(teamLastByRole.values()).reduce((sum, s) => sum + s.cumulative_cost, 0)
 
     return (
       <div className="min-h-screen bg-gray-900 p-6 flex flex-col items-center justify-center gap-6">
@@ -151,10 +171,10 @@ export default function GameRound() {
         <div className="w-full max-w-sm bg-gray-800 rounded-2xl p-5 flex flex-col gap-3">
           <h2 className="text-white font-semibold">Tus pedidos por ronda</h2>
           <div className="flex flex-wrap gap-2">
-            {myStates.sort((a, b) => a.round - b.round).map(s => (
+            {myStates.sort((a, b) => a.round - b.round).filter(s => s.order_placed !== null).map(s => (
               <div key={s.round} className="bg-gray-700 rounded-lg px-3 py-2 text-center min-w-12">
                 <p className="text-gray-500 text-xs">R{s.round}</p>
-                <p className="text-white font-bold">{s.order_placed ?? '-'}</p>
+                <p className="text-white font-bold">{s.order_placed}</p>
               </div>
             ))}
           </div>
