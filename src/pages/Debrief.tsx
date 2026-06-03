@@ -67,6 +67,34 @@ export default function Debrief() {
     })
   }
 
+  function exportCSV() {
+    const headers = ['equipo','rol','ronda','inventario','backorder','recibido','pedido_recibido','despachado','pedido_colocado','costo_ronda','costo_acumulado']
+    const rows = allStates
+      .filter(s => s.round <= (session?.config?.totalRounds ?? 999))
+      .sort((a, b) => {
+        const ta = teams.find(t => t.id === a.team_id)?.name ?? ''
+        const tb = teams.find(t => t.id === b.team_id)?.name ?? ''
+        return ta.localeCompare(tb) || a.round - b.round || a.role.localeCompare(b.role)
+      })
+      .map(s => {
+        const teamName = teams.find(t => t.id === s.team_id)?.name ?? s.team_id
+        return [
+          teamName, s.role, s.round, s.inventory, s.backorder,
+          s.incoming_shipment, s.incoming_order, s.shipped,
+          s.order_placed ?? '', s.cost_this_round?.toFixed(2) ?? '', s.cumulative_cost?.toFixed(2) ?? ''
+        ].join(',')
+      })
+
+    const csv = [headers.join(','), ...rows].join('\n')
+    const blob = new Blob([csv], { type: 'text/csv;charset=utf-8;' })
+    const url = URL.createObjectURL(blob)
+    const a = document.createElement('a')
+    a.href = url
+    a.download = `beergame-${session?.code ?? 'sesion'}.csv`
+    a.click()
+    URL.revokeObjectURL(url)
+  }
+
   function getTeamTotalCost(teamId: string) {
     const states = getTeamStates(teamId)
     const lastRound = Math.max(...states.map(s => s.round))
@@ -100,12 +128,20 @@ export default function Debrief() {
             <h1 className="text-3xl font-bold text-white">Debrief</h1>
             <p className="text-gray-400">Sesión {session?.code}</p>
           </div>
-          <button
-            onClick={() => navigate(`/dashboard/${sessionId}`)}
-            className="text-gray-400 hover:text-white text-sm transition"
-          >
-            ← Dashboard
-          </button>
+          <div className="flex items-center gap-3">
+            <button
+              onClick={exportCSV}
+              className="bg-green-700 hover:bg-green-600 text-white text-sm font-medium px-4 py-2 rounded-lg transition"
+            >
+              ⬇ Exportar CSV
+            </button>
+            <button
+              onClick={() => navigate(`/dashboard/${sessionId}`)}
+              className="text-gray-400 hover:text-white text-sm transition"
+            >
+              ← Dashboard
+            </button>
+          </div>
         </div>
 
         {/* Ranking */}

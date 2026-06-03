@@ -11,6 +11,8 @@ export const DEFAULT_CONFIG: GameConfig = {
   totalRounds: 26,
   initialDemandInTransit: 4,
   demandPattern: [4,4,4,4,8,8,8,8,8,8,8,8,8,8,8,8,8,8,8,8,8,8,8,8,8,8],
+  roundTimeSeconds: 0,
+  botsEnabled: false,
 }
 
 export function createInitialStates(

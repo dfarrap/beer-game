@@ -236,6 +236,39 @@ export default function CreateSession() {
               onChange={v => setParam('backorderCost', v)}
             />
 
+            <NumberInput
+              label="Tiempo por ronda (segundos)"
+              hint="0 = sin límite de tiempo. Los jugadores ven una cuenta regresiva."
+              value={config.roundTimeSeconds}
+              min={0}
+              max={600}
+              step={15}
+              onChange={v => setParam('roundTimeSeconds', v)}
+            />
+
+            <div className="flex flex-col gap-1">
+              <label className="text-gray-300 text-sm">Bots para roles vacíos</label>
+              <p className="text-gray-500 text-xs">Si un rol no tiene jugador, un bot hace pedidos automáticamente (igual a la demanda recibida)</p>
+              <div className="flex gap-3 mt-1">
+                <button
+                  onClick={() => setParam('botsEnabled', true)}
+                  className={`flex-1 py-2 rounded-lg font-medium text-sm transition ${
+                    config.botsEnabled ? 'bg-blue-600 text-white' : 'bg-gray-700 text-gray-300'
+                  }`}
+                >
+                  Activar bots
+                </button>
+                <button
+                  onClick={() => setParam('botsEnabled', false)}
+                  className={`flex-1 py-2 rounded-lg font-medium text-sm transition ${
+                    !config.botsEnabled ? 'bg-blue-600 text-white' : 'bg-gray-700 text-gray-300'
+                  }`}
+                >
+                  Sin bots
+                </button>
+              </div>
+            </div>
+
             <div className="flex flex-col gap-2">
               <label className="text-gray-300 text-sm">Demanda del cliente por ronda</label>
               <p className="text-gray-500 text-xs">Unidades que el cliente final pide en cada ronda</p>

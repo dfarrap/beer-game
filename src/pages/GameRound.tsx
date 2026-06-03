@@ -1,4 +1,4 @@
-import { useEffect, useState } from 'react'
+import { useEffect, useState, useRef } from 'react'
 import { useParams, useSearchParams } from 'react-router-dom'
 import { supabase } from '../lib/supabase'
 
@@ -28,6 +28,9 @@ export default function GameRound() {
   const [orderInput, setOrderInput] = useState('')
   const [submitted, setSubmitted] = useState(false)
   const [loading, setLoading] = useState(true)
+  const [timeLeft, setTimeLeft] = useState<number | null>(null)
+  const timerRef = useRef<ReturnType<typeof setInterval> | null>(null)
+  const roundStartRef = useRef<number>(Date.now())
 
   useEffect(() => {
     if (!sessionId) return
@@ -60,6 +63,41 @@ export default function GameRound() {
 
     return () => { supabase.removeChannel(channel) }
   }, [sessionId])
+
+  // Timer countdown
+  useEffect(() => {
+    if (!session || session.status !== 'running' || submitted) return
+    const secs = session.config?.roundTimeSeconds ?? 0
+    if (secs <= 0) { setTimeLeft(null); return }
+
+    if (timerRef.current) clearInterval(timerRef.current)
+    roundStartRef.current = Date.now()
+    setTimeLeft(secs)
+
+    timerRef.current = setInterval(() => {
+      const elapsed = Math.floor((Date.now() - roundStartRef.current) / 1000)
+      const remaining = secs - elapsed
+      if (remaining <= 0) {
+        setTimeLeft(0)
+        clearInterval(timerRef.current!)
+        // Auto-submit con el valor actual (o 0 si vacío)
+        if (!submitted) {
+          const val = parseInt(orderInput) >= 0 ? parseInt(orderInput) : 0
+          autoSubmit(isNaN(val) ? 0 : val)
+        }
+      } else {
+        setTimeLeft(remaining)
+      }
+    }, 1000)
+
+    return () => { if (timerRef.current) clearInterval(timerRef.current) }
+  }, [session?.current_round, session?.status, submitted])
+
+  async function autoSubmit(order: number) {
+    if (!roundState) return
+    await supabase.from('round_states').update({ order_placed: order }).eq('id', roundState.id)
+    setSubmitted(true)
+  }
 
   async function loadData() {
     const [{ data: sessionData }, { data: statesData }] = await Promise.all([
@@ -248,6 +286,22 @@ export default function GameRound() {
         <span className="text-gray-400 text-sm">Costo acumulado</span>
         <span className="text-yellow-400 font-bold">${roundState.cumulative_cost.toFixed(2)}</span>
       </div>
+
+      {/* Timer */}
+      {timeLeft !== null && !submitted && (
+        <div className={`rounded-xl p-3 flex items-center justify-between ${
+          timeLeft <= 10 ? 'bg-red-900 border border-red-700' :
+          timeLeft <= 30 ? 'bg-yellow-900 border border-yellow-700' :
+          'bg-gray-800'
+        }`}>
+          <span className="text-gray-300 text-sm">⏱ Tiempo restante</span>
+          <span className={`font-bold text-xl tabular-nums ${
+            timeLeft <= 10 ? 'text-red-300' : timeLeft <= 30 ? 'text-yellow-300' : 'text-white'
+          }`}>
+            {Math.floor(timeLeft / 60)}:{String(timeLeft % 60).padStart(2, '0')}
+          </span>
+        </div>
+      )}
 
       {/* Input de pedido */}
       {!submitted ? (

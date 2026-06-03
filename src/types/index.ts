@@ -13,6 +13,8 @@ export interface GameConfig {
   totalRounds: number
   demandPattern: number[]
   initialDemandInTransit: number
+  roundTimeSeconds: number   // 0 = sin límite
+  botsEnabled: boolean       // true = roles sin jugador usan bot
 }
 
 export interface Session {

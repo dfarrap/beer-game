@@ -46,13 +46,24 @@ export default function Lobby() {
 
   async function handleStart() {
     const config = session?.config ?? DEFAULT_CONFIG
+    const botsEnabled = config.botsEnabled ?? false
 
     // Crear round_states iniciales para todos los equipos
     const initialStates = teams.flatMap(team =>
       createInitialStates(team.id, config).map(s => ({ ...s, round: 1 }))
     )
 
-    await supabase.from('round_states').insert(initialStates)
+    const { data: insertedStates } = await supabase.from('round_states').insert(initialStates).select()
+
+    // Auto-submit bots en ronda 1 para roles sin jugador
+    if (botsEnabled && insertedStates) {
+      for (const state of insertedStates) {
+        const hasPlayer = players.some(p => p.team_id === state.team_id && p.role === state.role)
+        if (!hasPlayer) {
+          await supabase.from('round_states').update({ order_placed: config.initialDemandInTransit ?? 4 }).eq('id', state.id)
+        }
+      }
+    }
 
     await supabase
       .from('sessions')
