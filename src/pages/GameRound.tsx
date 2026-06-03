@@ -97,6 +97,76 @@ export default function GameRound() {
     </div>
   )
 
+  // Pantalla final del jugador
+  if (session?.status === 'finished') {
+    const myStates = teamStates.filter(s => s.role === role)
+    const lastState = myStates.sort((a, b) => b.round - a.round)[0]
+    const totalCost = lastState?.cumulative_cost ?? 0
+    const totalRounds = session?.config?.totalRounds ?? 0
+    const avgInventory = myStates.length > 0
+      ? (myStates.reduce((sum, s) => sum + s.inventory, 0) / myStates.length).toFixed(1)
+      : 0
+    const totalBackorder = myStates.reduce((sum, s) => sum + s.backorder, 0)
+    const teamTotalCost = teamStates
+      .filter(s => s.round === Math.max(...teamStates.map(x => x.round)))
+      .reduce((sum, s) => sum + s.cumulative_cost, 0)
+
+    return (
+      <div className="min-h-screen bg-gray-900 p-6 flex flex-col items-center justify-center gap-6">
+        <div className="text-center">
+          <div className="text-5xl mb-3">🏁</div>
+          <h1 className="text-3xl font-bold text-white">¡Juego terminado!</h1>
+          <p className="text-gray-400 mt-1">{ROLE_LABELS[role]} — {totalRounds} rondas</p>
+        </div>
+
+        {/* Tu desempeño */}
+        <div className="w-full max-w-sm bg-gray-800 rounded-2xl p-5 flex flex-col gap-4">
+          <h2 className="text-white font-semibold text-lg">Tu desempeño</h2>
+
+          <div className="grid grid-cols-2 gap-3">
+            <div className="bg-gray-700 rounded-xl p-3 text-center">
+              <p className="text-gray-400 text-xs mb-1">Costo total</p>
+              <p className="text-yellow-400 text-2xl font-bold">${totalCost.toFixed(2)}</p>
+            </div>
+            <div className="bg-gray-700 rounded-xl p-3 text-center">
+              <p className="text-gray-400 text-xs mb-1">Inventario promedio</p>
+              <p className="text-blue-400 text-2xl font-bold">{avgInventory}</p>
+              <p className="text-gray-500 text-xs">u/ronda</p>
+            </div>
+            <div className="bg-gray-700 rounded-xl p-3 text-center">
+              <p className="text-gray-400 text-xs mb-1">Backorder total</p>
+              <p className={`text-2xl font-bold ${totalBackorder > 0 ? 'text-red-400' : 'text-green-400'}`}>
+                {totalBackorder}
+              </p>
+              <p className="text-gray-500 text-xs">unidades</p>
+            </div>
+            <div className="bg-gray-700 rounded-xl p-3 text-center">
+              <p className="text-gray-400 text-xs mb-1">Costo del equipo</p>
+              <p className="text-purple-400 text-2xl font-bold">${teamTotalCost.toFixed(2)}</p>
+            </div>
+          </div>
+        </div>
+
+        {/* Historial de pedidos */}
+        <div className="w-full max-w-sm bg-gray-800 rounded-2xl p-5 flex flex-col gap-3">
+          <h2 className="text-white font-semibold">Tus pedidos por ronda</h2>
+          <div className="flex flex-wrap gap-2">
+            {myStates.sort((a, b) => a.round - b.round).map(s => (
+              <div key={s.round} className="bg-gray-700 rounded-lg px-3 py-2 text-center min-w-12">
+                <p className="text-gray-500 text-xs">R{s.round}</p>
+                <p className="text-white font-bold">{s.order_placed ?? '-'}</p>
+              </div>
+            ))}
+          </div>
+        </div>
+
+        <p className="text-gray-500 text-sm text-center">
+          El instructor mostrará el debrief completo con las gráficas del equipo.
+        </p>
+      </div>
+    )
+  }
+
   if (!roundState) return (
     <div className="min-h-screen bg-gray-900 flex items-center justify-center p-6">
       <div className="text-center">
