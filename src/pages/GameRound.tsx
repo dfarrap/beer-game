@@ -237,9 +237,15 @@ export default function GameRound() {
     </div>
   )
 
-  const pendingRoles = teamStates
-    .filter(s => s.round === session?.current_round && s.order_placed === null)
+  // Deduplicate: a role is only "pending" if it has NO confirmed entry for this round
+  const currentRoundStates = teamStates.filter(s => s.round === session?.current_round)
+  const confirmedRoles = new Set(
+    currentRoundStates.filter(s => s.order_placed !== null && s.order_placed !== undefined).map(s => s.role)
+  )
+  const pendingRoles = currentRoundStates
+    .filter(s => s.order_placed === null && !confirmedRoles.has(s.role))
     .map(s => ROLE_LABELS[s.role])
+    .filter((v, i, arr) => arr.indexOf(v) === i)  // unique labels
 
   return (
     <div className="min-h-screen bg-gray-900 p-4 flex flex-col gap-4 max-w-sm mx-auto">

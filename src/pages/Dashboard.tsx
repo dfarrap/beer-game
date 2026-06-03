@@ -181,6 +181,15 @@ export default function Dashboard() {
         }
       }
 
+      // Guard: skip if states for nextRound already exist (prevents double-advance)
+      const { data: existingNext } = await supabase
+        .from('round_states')
+        .select('id')
+        .eq('team_id', team.id)
+        .eq('round', nextRound)
+        .limit(1)
+      if (existingNext && existingNext.length > 0) continue
+
       const nextStates = advanceRound(currentStates as any, orders, nextRound, config)
       const { data: insertedStates } = await supabase.from('round_states').insert(
         nextStates.map(s => ({ ...s, round: nextRound, order_placed: null }))
@@ -207,8 +216,17 @@ export default function Dashboard() {
 
   function getTeamProgress(teamId: string) {
     const states = allStates.filter(s => s.team_id === teamId && s.round === currentRound)
-    const confirmed = states.filter(s => s.order_placed !== null).length
-    return { confirmed, total: 4, states }
+    // Deduplicate: if a role has any confirmed entry, count it as confirmed
+    const confirmedRoles = new Set(
+      states.filter(s => s.order_placed !== null && s.order_placed !== undefined).map(s => s.role)
+    )
+    const confirmed = confirmedRoles.size
+    // Return one state per role (prefer confirmed over null)
+    const deduped = ROLES.map(role => {
+      const confirmed = states.find(s => s.role === role && s.order_placed !== null)
+      return confirmed ?? states.find(s => s.role === role) ?? null
+    }).filter(Boolean)
+    return { confirmed, total: 4, states: deduped as typeof states }
   }
 
   const allTeamsReady = teams.length > 0 && teams.every(t => {

@@ -12,7 +12,8 @@ export interface GameConfig {
   backorderCost: number
   totalRounds: number
   demandPattern: number[]
-  initialDemandInTransit: number
+  initialDemandInTransit: number   // legacy fallback
+  historicalDemand: number[]       // demand per pre-game period: [T-1, T-2, …, T-max]
   roundTimeSeconds: number   // 0 = sin límite
   botsEnabled: boolean       // true = roles sin jugador usan bot
 }

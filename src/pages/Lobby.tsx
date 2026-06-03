@@ -49,7 +49,11 @@ export default function Lobby() {
     const config = session?.config ?? DEFAULT_CONFIG
     const botsEnabled = config.botsEnabled ?? false
 
-    // Crear round_states iniciales para todos los equipos
+    // Guardar ronda 0 (estado inicial) para visualización en debrief
+    const round0States = teams.flatMap(team => createInitialStates(team.id, config))
+    await supabase.from('round_states').insert(round0States)
+
+    // Crear round_states de ronda 1 para el juego
     const initialStates = teams.flatMap(team =>
       createInitialStates(team.id, config).map(s => ({ ...s, round: 1 }))
     )

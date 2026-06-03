@@ -182,21 +182,17 @@ export default function CreateSession() {
             />
 
             <NumberInput
-              label="Demanda en tránsito inicial (unidades)"
-              hint="Unidades pre-cargadas en las tuberías al inicio"
-              value={config.initialDemandInTransit}
-              min={0}
-              max={50}
-              onChange={v => setParam('initialDemandInTransit', v)}
-            />
-
-            <NumberInput
               label="Lead time de pedido (rondas)"
               hint="Rondas que tarda un pedido en llegar al proveedor"
               value={config.orderDelay}
               min={1}
               max={6}
-              onChange={v => setParam('orderDelay', v)}
+              onChange={v => {
+                const newSize = Math.max(v, config.shippingDelay)
+                const oldHist = config.historicalDemand ?? []
+                const newHist = Array(newSize).fill(0).map((_, i) => oldHist[i] ?? (config.initialDemandInTransit ?? 4))
+                setConfig(prev => ({ ...prev, orderDelay: v, historicalDemand: newHist }))
+              }}
             />
 
             <NumberInput
@@ -205,8 +201,42 @@ export default function CreateSession() {
               value={config.shippingDelay}
               min={1}
               max={6}
-              onChange={v => setParam('shippingDelay', v)}
+              onChange={v => {
+                const newSize = Math.max(config.orderDelay, v)
+                const oldHist = config.historicalDemand ?? []
+                const newHist = Array(newSize).fill(0).map((_, i) => oldHist[i] ?? (config.initialDemandInTransit ?? 4))
+                setConfig(prev => ({ ...prev, shippingDelay: v, historicalDemand: newHist }))
+              }}
             />
+
+            {/* Demanda histórica pre-juego: una casilla por período (T-1 más reciente) */}
+            <div className="flex flex-col gap-2">
+              <label className="text-gray-300 text-sm">Demanda histórica pre-juego</label>
+              <p className="text-gray-500 text-xs">
+                Unidades que se asume circulaban en todos los canales antes de empezar.
+                T-1 es el período más reciente (llega primero).
+                Se necesitan {Math.max(config.orderDelay, config.shippingDelay)} valores (= lead time máximo).
+              </p>
+              <div className="grid grid-cols-3 gap-2">
+                {(config.historicalDemand ?? []).map((val, i) => (
+                  <div key={i} className="flex flex-col items-center gap-1">
+                    <span className="text-gray-500 text-xs">T-{i + 1}{i === 0 ? ' (reciente)' : ''}</span>
+                    <input
+                      type="number"
+                      min={0}
+                      max={999}
+                      value={val}
+                      onChange={e => {
+                        const newHist = [...(config.historicalDemand ?? [])]
+                        newHist[i] = Math.max(0, Number(e.target.value))
+                        setParam('historicalDemand', newHist)
+                      }}
+                      className="bg-gray-700 text-white rounded-lg px-2 py-2 text-center text-sm outline-none focus:ring-2 focus:ring-blue-500 w-full"
+                    />
+                  </div>
+                ))}
+              </div>
+            </div>
 
             <NumberInput
               label="Número de rondas"

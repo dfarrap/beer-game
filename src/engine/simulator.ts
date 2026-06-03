@@ -10,6 +10,7 @@ export const DEFAULT_CONFIG: GameConfig = {
   backorderCost: 1.0,
   totalRounds: 26,
   initialDemandInTransit: 4,
+  historicalDemand: [4, 4],
   demandPattern: [4,4,4,4,8,8,8,8,8,8,8,8,8,8,8,8,8,8,8,8,8,8,8,8,8,8],
   roundTimeSeconds: 0,
   botsEnabled: false,
@@ -19,7 +20,11 @@ export function createInitialStates(
   teamId: string,
   config: GameConfig
 ): Omit<RoundState, 'id'>[] {
-  const d = config.initialDemandInTransit ?? 4
+  const fallback = config.initialDemandInTransit ?? 4
+  const hist = config.historicalDemand?.length
+    ? config.historicalDemand
+    : Array(Math.max(config.orderDelay, config.shippingDelay)).fill(fallback)
+
   return ROLES.map(role => ({
     team_id: teamId,
     round: 0,
@@ -30,8 +35,8 @@ export function createInitialStates(
     incoming_order: 0,
     shipped: 0,
     order_placed: null,
-    order_pipeline: Array(config.orderDelay).fill(d),
-    shipment_pipeline: Array(config.shippingDelay).fill(d),
+    order_pipeline: Array(config.orderDelay).fill(0).map((_, i) => hist[i] ?? fallback),
+    shipment_pipeline: Array(config.shippingDelay).fill(0).map((_, i) => hist[i] ?? fallback),
     cost_this_round: 0,
     cumulative_cost: 0,
   }))

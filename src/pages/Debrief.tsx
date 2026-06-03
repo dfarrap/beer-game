@@ -49,7 +49,7 @@ export default function Debrief() {
       setTeams(teamsData)
       setSelectedTeam(teamsData[0]?.id ?? '')
     }
-    if (sessionData) setMapRound(sessionData.config?.totalRounds ?? 1)
+    if (sessionData) setMapRound(0)
     if (statesData) setAllStates(statesData)
     setLoading(false)
   }
