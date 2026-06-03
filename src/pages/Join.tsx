@@ -1,5 +1,5 @@
-import { useState } from 'react'
-import { useNavigate } from 'react-router-dom'
+import { useState, useEffect } from 'react'
+import { useNavigate, useSearchParams } from 'react-router-dom'
 import { supabase } from '../lib/supabase'
 
 const ROLES = ['retailer', 'wholesaler', 'distributor', 'factory'] as const
@@ -12,7 +12,12 @@ const ROLE_LABELS: Record<string, string> = {
 
 export default function Join() {
   const navigate = useNavigate()
-  const [code, setCode] = useState('')
+  const [searchParams] = useSearchParams()
+  const [code, setCode] = useState(searchParams.get('code') ?? '')
+
+  useEffect(() => {
+    if (searchParams.get('code')) setCode(searchParams.get('code')!)
+  }, [])
   const [name, setName] = useState('')
   const [step, setStep] = useState<'code' | 'assign'>('code')
   const [session, setSession] = useState<any>(null)

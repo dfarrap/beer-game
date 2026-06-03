@@ -3,6 +3,7 @@ import { useParams, useNavigate } from 'react-router-dom'
 import { supabase } from '../lib/supabase'
 import type { Session, Team, Player } from '../types/index'
 import { createInitialStates, DEFAULT_CONFIG } from '../engine/simulator'
+import { QRCodeSVG } from 'qrcode.react'
 
 export default function Lobby() {
   const { sessionId } = useParams()
@@ -80,10 +81,19 @@ export default function Lobby() {
       <div className="max-w-2xl mx-auto flex flex-col gap-6">
 
         {/* Encabezado */}
-        <div className="bg-gray-800 rounded-2xl p-6 text-center">
-          <p className="text-gray-400 text-sm mb-1">Código de sesión</p>
-          <p className="text-5xl font-bold text-white tracking-widest">{session?.code}</p>
-          <p className="text-gray-400 text-sm mt-2">Comparte este código con los jugadores</p>
+        <div className="bg-gray-800 rounded-2xl p-6 text-center flex flex-col items-center gap-4">
+          <div>
+            <p className="text-gray-400 text-sm mb-1">Código de sesión</p>
+            <p className="text-5xl font-bold text-white tracking-widest">{session?.code}</p>
+            <p className="text-gray-400 text-sm mt-2">Escanea el QR o ingresa el código en:</p>
+            <p className="text-blue-400 text-sm font-medium">beergame.inalde.cloud/unirse</p>
+          </div>
+          <div className="bg-white p-3 rounded-xl">
+            <QRCodeSVG
+              value={`https://beergame.inalde.cloud/unirse?code=${session?.code}`}
+              size={180}
+            />
+          </div>
         </div>
 
         {/* Equipos y roles */}
