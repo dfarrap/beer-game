@@ -196,6 +196,13 @@ export default function Dashboard() {
           </button>
         ) : null}
 
+        <button
+          onClick={() => navigate('/instructor')}
+          className="text-gray-400 hover:text-white text-sm text-center transition"
+        >
+          ← Volver al panel
+        </button>
+
       </div>
     </div>
   )

@@ -132,6 +132,13 @@ export default function Lobby() {
         <p className="text-gray-500 text-sm text-center">
           Modo de avance: {session?.round_advance_mode === 'automatic' ? 'Automático' : 'Manual'}
         </p>
+
+        <button
+          onClick={() => navigate('/instructor')}
+          className="text-gray-400 hover:text-white text-sm text-center transition"
+        >
+          ← Volver al panel
+        </button>
       </div>
     </div>
   )
