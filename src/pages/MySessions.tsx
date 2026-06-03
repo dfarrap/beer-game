@@ -21,6 +21,7 @@ export default function MySessions() {
   const [players, setPlayers] = useState<any[]>([])
   const [loading, setLoading] = useState(true)
   const [confirming, setConfirming] = useState<string | null>(null)
+  const [confirmingDelete, setConfirmingDelete] = useState<string | null>(null)
 
   useEffect(() => {
     loadSessions()
@@ -36,6 +37,19 @@ export default function MySessions() {
     if (teamsData) setTeams(teamsData)
     if (playersData) setPlayers(playersData)
     setLoading(false)
+  }
+
+  async function handleDelete(sessionId: string) {
+    // Borrar en cascada: round_states → players → teams → session
+    const sessionTeamIds = teams.filter(t => t.session_id === sessionId).map(t => t.id)
+    if (sessionTeamIds.length > 0) {
+      await supabase.from('round_states').delete().in('team_id', sessionTeamIds)
+    }
+    await supabase.from('players').delete().eq('session_id', sessionId)
+    await supabase.from('teams').delete().eq('session_id', sessionId)
+    await supabase.from('sessions').delete().eq('id', sessionId)
+    setConfirmingDelete(null)
+    loadSessions()
   }
 
   async function handleFinish(sessionId: string) {
@@ -148,6 +162,32 @@ export default function MySessions() {
                     className="bg-red-900 hover:bg-red-800 text-red-300 text-sm font-medium px-3 py-2 rounded-lg transition"
                   >
                     Finalizar
+                  </button>
+                )
+              )}
+
+              {session.status === 'finished' && (
+                confirmingDelete === session.id ? (
+                  <div className="flex gap-2">
+                    <button
+                      onClick={() => handleDelete(session.id)}
+                      className="bg-red-600 hover:bg-red-700 text-white text-sm font-medium px-3 py-2 rounded-lg transition"
+                    >
+                      Eliminar
+                    </button>
+                    <button
+                      onClick={() => setConfirmingDelete(null)}
+                      className="bg-gray-600 hover:bg-gray-500 text-white text-sm font-medium px-3 py-2 rounded-lg transition"
+                    >
+                      Cancelar
+                    </button>
+                  </div>
+                ) : (
+                  <button
+                    onClick={() => setConfirmingDelete(session.id)}
+                    className="bg-gray-700 hover:bg-gray-600 text-gray-400 text-sm font-medium px-3 py-2 rounded-lg transition"
+                  >
+                    🗑 Eliminar
                   </button>
                 )
               )}
