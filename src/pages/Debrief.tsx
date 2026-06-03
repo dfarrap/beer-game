@@ -5,12 +5,13 @@ import {
   LineChart, Line, XAxis, YAxis, CartesianGrid, Tooltip, Legend, ResponsiveContainer
 } from 'recharts'
 import Logo from '../components/Logo'
+import SupplyChainMap from '../components/SupplyChainMap'
 
 const ROLES = ['retailer', 'wholesaler', 'distributor', 'factory'] as const
 const ROLE_LABELS: Record<string, string> = {
   retailer: 'Minorista',
-  wholesaler: 'Mayorista',
-  distributor: 'Distribuidor',
+  wholesaler: 'Distribuidor',
+  distributor: 'Mayorista',
   factory: 'Fábrica',
 }
 const ROLE_COLORS: Record<string, string> = {
@@ -27,6 +28,7 @@ export default function Debrief() {
   const [teams, setTeams] = useState<any[]>([])
   const [allStates, setAllStates] = useState<any[]>([])
   const [selectedTeam, setSelectedTeam] = useState<string>('')
+  const [mapRound, setMapRound] = useState(1)
   const [loading, setLoading] = useState(true)
 
   useEffect(() => {
@@ -47,6 +49,7 @@ export default function Debrief() {
       setTeams(teamsData)
       setSelectedTeam(teamsData[0]?.id ?? '')
     }
+    if (sessionData) setMapRound(sessionData.config?.totalRounds ?? 1)
     if (statesData) setAllStates(statesData)
     setLoading(false)
   }
@@ -183,6 +186,16 @@ export default function Debrief() {
           </div>
         )}
 
+        {/* Mapa animado de la cadena */}
+        <SupplyChainMap
+          states={allStates.filter(s => s.team_id === selectedTeam && s.round === mapRound)}
+          round={mapRound}
+          totalRounds={session?.config?.totalRounds ?? 1}
+          demandPattern={session?.config?.demandPattern ?? []}
+          navRound={mapRound}
+          onNavChange={setMapRound}
+        />
+
         {/* Gráfica efecto látigo (pedidos) */}
         <div className="bg-gray-800 rounded-2xl p-5">
           <h2 className="text-white font-semibold text-lg mb-1">Efecto látigo — Pedidos colocados</h2>
@@ -250,6 +263,10 @@ export default function Debrief() {
               ))}
             </LineChart>
           </ResponsiveContainer>
+        </div>
+
+        <div className="flex justify-center pt-2 pb-6">
+          <img src="/INALDE_Blanco.png" alt="INALDE" className="h-5 w-auto opacity-40" />
         </div>
 
       </div>

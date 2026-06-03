@@ -7,6 +7,7 @@ export default function InstructorHome() {
   return (
     <div className="min-h-screen bg-gray-900 flex flex-col items-center justify-center gap-8 p-6">
       <div className="text-center flex flex-col items-center gap-3">
+        <img src="/INALDE_Blanco.png" alt="INALDE" className="h-6 w-auto opacity-90" />
         <Logo size="md" />
         <h1 className="text-3xl font-bold text-white mb-1">Panel del instructor</h1>
         <p className="text-gray-400">¿Qué deseas hacer?</p>

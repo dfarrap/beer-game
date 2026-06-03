@@ -5,8 +5,8 @@ import Logo from '../components/Logo'
 
 const ROLE_LABELS: Record<string, string> = {
   retailer: 'Minorista',
-  wholesaler: 'Mayorista',
-  distributor: 'Distribuidor',
+  wholesaler: 'Distribuidor',
+  distributor: 'Mayorista',
   factory: 'Fábrica',
 }
 
@@ -223,6 +223,7 @@ export default function GameRound() {
         <p className="text-gray-500 text-sm text-center">
           El instructor mostrará el debrief completo con las gráficas del equipo.
         </p>
+        <img src="/INALDE_Blanco.png" alt="INALDE" className="h-5 w-auto opacity-40" />
       </div>
     )
   }

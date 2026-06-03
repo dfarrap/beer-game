@@ -6,8 +6,8 @@ import Logo from '../components/Logo'
 const ROLES = ['retailer', 'wholesaler', 'distributor', 'factory'] as const
 const ROLE_LABELS: Record<string, string> = {
   retailer: 'Minorista',
-  wholesaler: 'Mayorista',
-  distributor: 'Distribuidor',
+  wholesaler: 'Distribuidor',
+  distributor: 'Mayorista',
   factory: 'Fábrica',
 }
 

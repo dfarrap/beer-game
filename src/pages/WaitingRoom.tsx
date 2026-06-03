@@ -4,8 +4,8 @@ import { supabase } from '../lib/supabase'
 
 const ROLE_LABELS: Record<string, string> = {
   retailer: 'Minorista',
-  wholesaler: 'Mayorista',
-  distributor: 'Distribuidor',
+  wholesaler: 'Distribuidor',
+  distributor: 'Mayorista',
   factory: 'Fábrica',
 }
 

@@ -5,11 +5,12 @@ import { advanceRound } from '../engine/simulator'
 import type { Role } from '../types/index'
 import { QRCodeSVG } from 'qrcode.react'
 import Logo from '../components/Logo'
+import SupplyChainMap from '../components/SupplyChainMap'
 
 const ROLE_LABELS: Record<string, string> = {
   retailer: 'Minorista',
-  wholesaler: 'Mayorista',
-  distributor: 'Distribuidor',
+  wholesaler: 'Distribuidor',
+  distributor: 'Mayorista',
   factory: 'Fábrica',
 }
 
@@ -24,6 +25,7 @@ export default function Dashboard() {
   const [allStates, setAllStates] = useState<any[]>([])
   const [advancing, setAdvancing] = useState(false)
   const [showQR, setShowQR] = useState(false)
+  const [mapTeamId, setMapTeamId] = useState<string>('')
   const [timeLeft, setTimeLeft] = useState<number | null>(null)
   const timerRef = useRef<ReturnType<typeof setInterval> | null>(null)
   const roundStartRef = useRef<number>(Date.now())
@@ -97,7 +99,10 @@ export default function Dashboard() {
       ])
 
     if (sessionData) setSession(sessionData)
-    if (teamsData) setTeams(teamsData)
+    if (teamsData) {
+      setTeams(teamsData)
+      setMapTeamId(prev => prev || teamsData[0]?.id || '')
+    }
     if (playersData) setPlayers(playersData)
     if (statesData) setAllStates(statesData)
   }
@@ -270,6 +275,33 @@ export default function Dashboard() {
           </div>
         )}
 
+        {/* Mapa de cadena de suministro */}
+        {session?.status === 'running' && mapTeamId && (
+          <div className="flex flex-col gap-2">
+            {teams.length > 1 && (
+              <div className="flex gap-2 flex-wrap">
+                {teams.map(t => (
+                  <button
+                    key={t.id}
+                    onClick={() => setMapTeamId(t.id)}
+                    className={`px-3 py-1 rounded-lg text-sm font-medium transition ${
+                      mapTeamId === t.id ? 'bg-blue-600 text-white' : 'bg-gray-700 text-gray-300'
+                    }`}
+                  >
+                    {t.name}
+                  </button>
+                ))}
+              </div>
+            )}
+            <SupplyChainMap
+              states={allStates.filter(s => s.team_id === mapTeamId && s.round === currentRound)}
+              round={currentRound}
+              totalRounds={session?.config?.totalRounds ?? currentRound}
+              demandPattern={session?.config?.demandPattern ?? []}
+            />
+          </div>
+        )}
+
         {/* Tarjetas por equipo */}
         {teams.map(team => {
           const { confirmed, states } = getTeamProgress(team.id)
@@ -333,6 +365,10 @@ export default function Dashboard() {
         <button onClick={() => navigate('/instructor')} className="text-gray-400 hover:text-white text-sm text-center transition">
           ← Volver al panel
         </button>
+
+        <div className="flex justify-center pt-2 pb-4">
+          <img src="/INALDE_Blanco.png" alt="INALDE" className="h-5 w-auto opacity-40" />
+        </div>
 
       </div>
     </div>

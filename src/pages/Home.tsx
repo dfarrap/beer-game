@@ -7,9 +7,10 @@ export default function Home() {
   return (
     <div className="min-h-screen bg-gray-900 flex flex-col items-center justify-center gap-8 p-6">
       <div className="text-center flex flex-col items-center gap-3">
+        <img src="/INALDE_Blanco.png" alt="INALDE" className="h-8 w-auto opacity-90" />
         <Logo size="lg" />
         <h1 className="text-4xl font-bold text-white mb-1">Beer Game</h1>
-        <p className="text-gray-400">Simulación de cadena de suministro — INALDE</p>
+        <p className="text-gray-400">Simulación de cadena de suministro</p>
       </div>
 
       <div className="flex flex-col gap-4 w-full max-w-xs">
