@@ -12,7 +12,7 @@ export default function Home() {
 
       <div className="flex flex-col gap-4 w-full max-w-xs">
         <button
-          onClick={() => navigate('/crear')}
+          onClick={() => navigate('/instructor')}
           className="bg-blue-600 hover:bg-blue-700 text-white font-semibold py-4 px-6 rounded-xl text-lg transition"
         >
           Soy instructor
@@ -22,6 +22,12 @@ export default function Home() {
           className="bg-green-600 hover:bg-green-700 text-white font-semibold py-4 px-6 rounded-xl text-lg transition"
         >
           Soy jugador
+        </button>
+        <button
+          onClick={() => navigate('/reconectar')}
+          className="bg-yellow-600 hover:bg-yellow-700 text-white font-semibold py-4 px-6 rounded-xl text-lg transition"
+        >
+          Reconectarme
         </button>
       </div>
     </div>

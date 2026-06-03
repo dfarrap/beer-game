@@ -59,7 +59,7 @@ export default function CreateSession() {
 
   async function handleCreate() {
     if (!hostName.trim()) {
-      setError('Ingresa tu nombre')
+      setError('Ingresa el nombre de la sesión')
       return
     }
     setLoading(true)
@@ -107,14 +107,15 @@ export default function CreateSession() {
       <div className="w-full max-w-md bg-gray-800 rounded-2xl p-8 flex flex-col gap-5">
         <h1 className="text-2xl font-bold text-white">Nueva sesión</h1>
 
-        {/* Instructor */}
+        {/* Nombre sesión */}
         <div className="flex flex-col gap-1">
-          <label className="text-gray-300 text-sm">Tu nombre (instructor)</label>
+          <label className="text-gray-300 text-sm">Nombre de la sesión</label>
+          <p className="text-gray-500 text-xs">Ej: MBA Bogotá · Logística · Grupo A</p>
           <input
             type="text"
             value={hostName}
             onChange={e => setHostName(e.target.value)}
-            placeholder="Ej: Prof. García"
+            placeholder="Ej: MBA Ejecutivo — Operaciones 2026"
             className="bg-gray-700 text-white rounded-lg px-4 py-3 outline-none focus:ring-2 focus:ring-blue-500"
           />
         </div>
