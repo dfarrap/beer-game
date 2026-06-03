@@ -6,7 +6,10 @@ import { DEFAULT_CONFIG } from '../engine/simulator'
 import type { GameConfig } from '../types/index'
 
 function generateCode(): string {
-  return Math.random().toString(36).substring(2, 8).toUpperCase()
+  // Criptográficamente seguro: 6 caracteres alfanuméricos en mayúscula (sin O/0/I/1 confusos)
+  const chars = 'ABCDEFGHJKLMNPQRSTUVWXYZ23456789'
+  const bytes = crypto.getRandomValues(new Uint8Array(6))
+  return Array.from(bytes, b => chars[b % chars.length]).join('')
 }
 
 function NumberInput({

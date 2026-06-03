@@ -83,8 +83,9 @@ export default function GameRound() {
         clearInterval(timerRef.current!)
         // Auto-submit con el valor actual (o 0 si vacío)
         if (!submitted) {
-          const val = parseInt(orderInput) >= 0 ? parseInt(orderInput) : 0
-          autoSubmit(isNaN(val) ? 0 : val)
+          const raw = parseInt(orderInput)
+          const val = isNaN(raw) ? 0 : Math.min(999, Math.max(0, raw))
+          autoSubmit(val)
         }
       } else {
         setTimeLeft(remaining)
@@ -121,8 +122,8 @@ export default function GameRound() {
   }
 
   async function handleSubmitOrder() {
-    const order = parseInt(orderInput)
-    if (isNaN(order) || order < 0) return
+    const order = Math.min(999, Math.max(0, parseInt(orderInput)))
+    if (isNaN(order)) return
 
     await supabase
       .from('round_states')
@@ -319,6 +320,7 @@ export default function GameRound() {
           <input
             type="number"
             min="0"
+            max="999"
             value={orderInput}
             onChange={e => setOrderInput(e.target.value)}
             placeholder="0"

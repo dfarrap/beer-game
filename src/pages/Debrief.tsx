@@ -71,6 +71,16 @@ export default function Debrief() {
     })
   }
 
+  function csvEscape(val: unknown): string {
+    const s = String(val ?? '')
+    // Neutraliza fórmulas CSV injection y escapa comillas/comas
+    const safe = s.replace(/^[=+\-@\t\r]/, "'$&")
+    if (safe.includes(',') || safe.includes('"') || safe.includes('\n')) {
+      return '"' + safe.replace(/"/g, '""') + '"'
+    }
+    return safe
+  }
+
   function exportCSV() {
     const headers = ['equipo','rol','ronda','inventario','backorder','recibido','pedido_recibido','despachado','pedido_colocado','costo_ronda','costo_acumulado']
     const rows = allStates
@@ -86,7 +96,7 @@ export default function Debrief() {
           teamName, s.role, s.round, s.inventory, s.backorder,
           s.incoming_shipment, s.incoming_order, s.shipped,
           s.order_placed ?? '', s.cost_this_round?.toFixed(2) ?? '', s.cumulative_cost?.toFixed(2) ?? ''
-        ].join(',')
+        ].map(csvEscape).join(',')
       })
 
     const csv = [headers.join(','), ...rows].join('\n')

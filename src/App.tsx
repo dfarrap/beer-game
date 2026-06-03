@@ -10,21 +10,29 @@ import Debrief from './pages/Debrief'
 import Reconnect from './pages/Reconnect'
 import MySessions from './pages/MySessions'
 import InstructorHome from './pages/InstructorHome'
+import InstructorPinGate from './components/InstructorPinGate'
+
+function Instructor({ children }: { children: React.ReactNode }) {
+  return <InstructorPinGate>{children}</InstructorPinGate>
+}
 
 function App() {
   return (
     <Routes>
-      <Route path="/" element={<Home />} />
-      <Route path="/crear" element={<CreateSession />} />
-      <Route path="/lobby/:sessionId" element={<Lobby />} />
-      <Route path="/unirse" element={<Join />} />
-      <Route path="/espera/:sessionId" element={<WaitingRoom />} />
-      <Route path="/ronda/:sessionId" element={<GameRound />} />
-      <Route path="/dashboard/:sessionId" element={<Dashboard />} />
-      <Route path="/debrief/:sessionId" element={<Debrief />} />
-      <Route path="/reconectar" element={<Reconnect />} />
-      <Route path="/mis-sesiones" element={<MySessions />} />
-      <Route path="/instructor" element={<InstructorHome />} />
+      {/* Rutas públicas (jugadores) */}
+      <Route path="/"                   element={<Home />} />
+      <Route path="/unirse"             element={<Join />} />
+      <Route path="/espera/:sessionId"  element={<WaitingRoom />} />
+      <Route path="/ronda/:sessionId"   element={<GameRound />} />
+      <Route path="/reconectar"         element={<Reconnect />} />
+
+      {/* Rutas protegidas (instructor) */}
+      <Route path="/instructor"         element={<Instructor><InstructorHome /></Instructor>} />
+      <Route path="/crear"              element={<Instructor><CreateSession /></Instructor>} />
+      <Route path="/lobby/:sessionId"   element={<Instructor><Lobby /></Instructor>} />
+      <Route path="/dashboard/:sessionId" element={<Instructor><Dashboard /></Instructor>} />
+      <Route path="/debrief/:sessionId" element={<Instructor><Debrief /></Instructor>} />
+      <Route path="/mis-sesiones"       element={<Instructor><MySessions /></Instructor>} />
     </Routes>
   )
 }
