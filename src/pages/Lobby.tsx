@@ -1,5 +1,6 @@
 import { useEffect, useState } from 'react'
 import { useParams, useNavigate } from 'react-router-dom'
+import Logo from '../components/Logo'
 import { supabase } from '../lib/supabase'
 import type { Session, Team, Player } from '../types/index'
 import { createInitialStates, DEFAULT_CONFIG } from '../engine/simulator'
@@ -93,6 +94,7 @@ export default function Lobby() {
 
         {/* Encabezado */}
         <div className="bg-gray-800 rounded-2xl p-6 text-center flex flex-col items-center gap-4">
+          <Logo size="sm" />
           <div>
             <p className="text-gray-400 text-sm mb-1">Código de sesión</p>
             <p className="text-5xl font-bold text-white tracking-widest">{session?.code}</p>

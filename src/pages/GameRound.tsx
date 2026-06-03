@@ -1,6 +1,7 @@
 import { useEffect, useState, useRef } from 'react'
 import { useParams, useSearchParams } from 'react-router-dom'
 import { supabase } from '../lib/supabase'
+import Logo from '../components/Logo'
 
 const ROLE_LABELS: Record<string, string> = {
   retailer: 'Minorista',
@@ -171,8 +172,9 @@ export default function GameRound() {
 
     return (
       <div className="min-h-screen bg-gray-900 p-6 flex flex-col items-center justify-center gap-6">
-        <div className="text-center">
-          <div className="text-5xl mb-3">🏁</div>
+        <div className="text-center flex flex-col items-center gap-2">
+          <Logo size="md" />
+          <div className="text-4xl">🏁</div>
           <h1 className="text-3xl font-bold text-white">¡Juego terminado!</h1>
           <p className="text-gray-400 mt-1">{ROLE_LABELS[role]} — {totalRounds} rondas</p>
         </div>

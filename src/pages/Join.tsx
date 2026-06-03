@@ -1,6 +1,7 @@
 import { useState, useEffect } from 'react'
 import { useNavigate, useSearchParams } from 'react-router-dom'
 import { supabase } from '../lib/supabase'
+import Logo from '../components/Logo'
 
 const ROLES = ['retailer', 'wholesaler', 'distributor', 'factory'] as const
 const ROLE_LABELS: Record<string, string> = {
@@ -99,7 +100,10 @@ export default function Join() {
   if (step === 'code') return (
     <div className="min-h-screen bg-gray-900 flex flex-col items-center justify-center p-6">
       <div className="w-full max-w-sm bg-gray-800 rounded-2xl p-8 flex flex-col gap-5">
-        <h1 className="text-2xl font-bold text-white">Unirse al juego</h1>
+        <div className="flex items-center gap-3 mb-1">
+          <Logo size="sm" />
+          <h1 className="text-2xl font-bold text-white">Unirse al juego</h1>
+        </div>
 
         <div className="flex flex-col gap-2">
           <label className="text-gray-300 text-sm">Tu nombre</label>

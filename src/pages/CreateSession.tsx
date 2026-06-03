@@ -1,5 +1,6 @@
 import { useState } from 'react'
 import { useNavigate } from 'react-router-dom'
+import Logo from '../components/Logo'
 import { supabase } from '../lib/supabase'
 import { DEFAULT_CONFIG } from '../engine/simulator'
 import type { GameConfig } from '../types/index'
@@ -105,7 +106,10 @@ export default function CreateSession() {
   return (
     <div className="min-h-screen bg-gray-900 flex flex-col items-center justify-center p-6">
       <div className="w-full max-w-md bg-gray-800 rounded-2xl p-8 flex flex-col gap-5">
-        <h1 className="text-2xl font-bold text-white">Nueva sesión</h1>
+        <div className="flex items-center gap-3 mb-1">
+          <Logo size="sm" />
+          <h1 className="text-2xl font-bold text-white">Nueva sesión</h1>
+        </div>
 
         {/* Nombre sesión */}
         <div className="flex flex-col gap-1">

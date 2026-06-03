@@ -4,6 +4,7 @@ import { supabase } from '../lib/supabase'
 import { advanceRound } from '../engine/simulator'
 import type { Role } from '../types/index'
 import { QRCodeSVG } from 'qrcode.react'
+import Logo from '../components/Logo'
 
 const ROLE_LABELS: Record<string, string> = {
   retailer: 'Minorista',
@@ -220,13 +221,16 @@ export default function Dashboard() {
 
         {/* Encabezado */}
         <div className="flex items-center justify-between">
-          <div>
+          <div className="flex items-center gap-3">
+            <Logo size="sm" />
+            <div>
             <h1 className="text-2xl font-bold text-white">Dashboard instructor</h1>
             <p className="text-gray-400 text-sm">
               Ronda {currentRound} / {session?.config?.totalRounds} —
               Modo: {session?.round_advance_mode === 'automatic' ? 'Automático' : 'Manual'}
               {session?.config?.botsEnabled && ' · 🤖 Bots activos'}
             </p>
+            </div>
           </div>
           <div className="flex items-center gap-3">
             {timeLeft !== null && session?.status === 'running' && (

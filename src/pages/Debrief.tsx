@@ -4,6 +4,7 @@ import { supabase } from '../lib/supabase'
 import {
   LineChart, Line, XAxis, YAxis, CartesianGrid, Tooltip, Legend, ResponsiveContainer
 } from 'recharts'
+import Logo from '../components/Logo'
 
 const ROLES = ['retailer', 'wholesaler', 'distributor', 'factory'] as const
 const ROLE_LABELS: Record<string, string> = {
@@ -124,9 +125,12 @@ export default function Debrief() {
 
         {/* Encabezado */}
         <div className="flex items-center justify-between">
-          <div>
-            <h1 className="text-3xl font-bold text-white">Debrief</h1>
-            <p className="text-gray-400">Sesión {session?.code}</p>
+          <div className="flex items-center gap-3">
+            <Logo size="sm" />
+            <div>
+              <h1 className="text-3xl font-bold text-white">Debrief</h1>
+              <p className="text-gray-400">Sesión {session?.code}</p>
+            </div>
           </div>
           <div className="flex items-center gap-3">
             <button
