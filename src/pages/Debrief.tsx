@@ -266,7 +266,7 @@ export default function Debrief() {
         </div>
 
         <div className="flex justify-center pt-2 pb-6">
-          <img src="/INALDE_Blanco.png" alt="INALDE" className="h-5 w-auto opacity-40" />
+          <img src="/INALDE_Blanco.png" alt="INALDE" className="h-10 w-auto opacity-70" />
         </div>
 
       </div>
