@@ -17,6 +17,8 @@ const STATUS_COLORS: Record<string, string> = {
 export default function MySessions() {
   const navigate = useNavigate()
   const [sessions, setSessions] = useState<any[]>([])
+  const [teams, setTeams] = useState<any[]>([])
+  const [players, setPlayers] = useState<any[]>([])
   const [loading, setLoading] = useState(true)
   const [confirming, setConfirming] = useState<string | null>(null)
 
@@ -25,11 +27,14 @@ export default function MySessions() {
   }, [])
 
   async function loadSessions() {
-    const { data } = await supabase
-      .from('sessions')
-      .select('*')
-      .order('created_at', { ascending: false })
-    if (data) setSessions(data)
+    const [{ data: sessionsData }, { data: teamsData }, { data: playersData }] = await Promise.all([
+      supabase.from('sessions').select('*').order('created_at', { ascending: false }),
+      supabase.from('teams').select('*'),
+      supabase.from('players').select('*'),
+    ])
+    if (sessionsData) setSessions(sessionsData)
+    if (teamsData) setTeams(teamsData)
+    if (playersData) setPlayers(playersData)
     setLoading(false)
   }
 
@@ -69,7 +74,12 @@ export default function MySessions() {
           <p className="text-gray-500 text-center mt-10">No hay sesiones creadas aún.</p>
         )}
 
-        {sessions.map(session => (
+        {sessions.map(session => {
+          const sessionTeams = teams.filter(t => t.session_id === session.id)
+          const sessionPlayers = players.filter(p => p.session_id === session.id)
+          const maxPlayers = sessionTeams.length * 4
+
+          return (
           <div key={session.id} className="bg-gray-800 rounded-2xl p-5 flex flex-col gap-3">
 
             {/* Encabezado */}
@@ -87,13 +97,23 @@ export default function MySessions() {
               </span>
             </div>
 
-            {/* Info */}
-            <div className="text-gray-400 text-sm">
-              Sesión: <span className="text-white">{session.host_id}</span>
-              {' · '}
-              Ronda: <span className="text-white">{session.current_round} / {session.config?.totalRounds}</span>
-              {' · '}
-              Avance: <span className="text-white">{session.round_advance_mode === 'automatic' ? 'Automático' : 'Manual'}</span>
+            {/* Nombre sesión */}
+            <p className="text-white font-medium">{session.host_id}</p>
+
+            {/* Stats en chips */}
+            <div className="flex flex-wrap gap-2">
+              <span className="bg-gray-700 text-gray-300 text-xs px-3 py-1 rounded-full">
+                👥 {sessionPlayers.length} / {maxPlayers} jugadores
+              </span>
+              <span className="bg-gray-700 text-gray-300 text-xs px-3 py-1 rounded-full">
+                🏢 {sessionTeams.length} {sessionTeams.length === 1 ? 'equipo' : 'equipos'}
+              </span>
+              <span className="bg-gray-700 text-gray-300 text-xs px-3 py-1 rounded-full">
+                🔄 Ronda {session.current_round} / {session.config?.totalRounds}
+              </span>
+              <span className="bg-gray-700 text-gray-300 text-xs px-3 py-1 rounded-full">
+                ⚙️ {session.round_advance_mode === 'automatic' ? 'Automático' : 'Manual'}
+              </span>
             </div>
 
             {/* Botones */}
@@ -133,7 +153,7 @@ export default function MySessions() {
               )}
             </div>
           </div>
-        ))}
+        )})}
       </div>
     </div>
   )
